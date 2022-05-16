@@ -8,9 +8,26 @@ on:
 
 jobs:
 
-  build:
+  test:
+    name: Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: river-bank
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
+
     - uses: actions/checkout@v3
 
     - name: Set up Go
@@ -23,5 +40,8 @@ jobs:
         curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz
         sudo mv migrate /usr/bin/
 
+    - name: Run migrations
+      run: make migrateup
+
     - name: Test
-      run: go test -v ./...
+      run: make test
