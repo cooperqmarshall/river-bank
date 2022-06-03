@@ -1,0 +1,36 @@
+package api
+
+import (
+	db "github.com/cooperqmarshall/river-bank/db/sqlc"
+	"github.com/gin-gonic/gin"
+)
+
+// Serves HTTP requests for our banking service
+type Server struct {
+	store  *db.Store
+	router *gin.Engine
+}
+
+// Constructs a new HTTP server and sets up routing
+func NewServer(store *db.Store) *Server {
+	server := &Server{store: store}
+	router := gin.Default()
+
+	// add routes to router
+	router.POST("/accounts", server.createAccount)
+	router.GET("/account/:id", server.getAccount)
+	router.GET("/accounts", server.listAccounts)
+	router.DELETE("/account/:id", server.deleteAccount)
+	router.POST("/account", server.updateAccount)
+
+	server.router = router
+	return server
+}
+
+func (server *Server) Start(address string) error {
+	return server.router.Run(address)
+}
+
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
+}
