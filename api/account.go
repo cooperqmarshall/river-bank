@@ -10,7 +10,7 @@ import (
 
 type createAccountRequest struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=USD EUR CAD"`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
@@ -19,7 +19,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	account, err := server.store.Queries.CreateAccount(ctx, db.CreateAccountParams{
+	account, err := server.store.CreateAccount(ctx, db.CreateAccountParams{
 		Owner:    req.Owner,
 		Balance:  0,
 		Currency: req.Currency,
@@ -54,8 +54,8 @@ func (server *Server) getAccount(ctx *gin.Context) {
 }
 
 type listAccountsRequest struct {
-	PageId   int32 `json:"page_id" binding:"required,min=1"`
-	PageSize int32 `json:"page_size" binding:"required,min=1,max=20"`
+	PageId   int32 `form:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=1,max=20"`
 }
 
 func (server *Server) listAccounts(ctx *gin.Context) {
